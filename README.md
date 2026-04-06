@@ -29,6 +29,10 @@ Ein vollständiger, automatisierter Discord-Bot für Server-Management und Commu
 - `/community poll` - Umfragen mit Reaktionen erstellen
 - `/community reactionrole` - Reaktionsrollen für automatische Rollen-Zuweisung
 - `/community event` - Event-Reminders in #announcements posten
+- `/community announcement` - Ankündigungen in #announcements senden
+- `/community support` - Support-Ticket anfordern
+- `/community ticket create` - Ticket-Kanal erstellen
+- `/community ticket close` - Ticket-Kanal schließen
 - `/community meme` - Zufällige Memes posten
 - `/community quiz` - Einfache Quiz starten
 - Automatische Rollen-Zuweisung nach Aktivität (Active Member)
@@ -100,6 +104,20 @@ Ein vollständiger, automatisierter Discord-Bot für Server-Management und Commu
 
 > Hinweis: Der Workflow nutzt den eingebauten GitHub Actions Token `github.token`, daher musst du normalerweise keinen eigenen Secret-Namen anlegen.
 > Falls du einen eigenen Token einträgst, nutze `Settings -> Secrets and variables -> Actions -> New repository secret` mit einem Namen wie `ACTIONS_DEPLOY_TOKEN`.
+>
+> Wenn du nach dem ersten Push eine 404-Seite siehst, überprüfe:
+> 1. Ob deine Dateien auf GitHub im Branch `main` / `master` sind.
+> 2. Ob der Workflow `.github/workflows/pages.yml` erfolgreich ausgeführt wurde.
+> 3. Ob in den Repository-Einstellungen unter GitHub Pages als Quelle `gh-pages` oder `deployment branch` ausgewählt ist.
+> 4. Warte ein paar Minuten, bis GitHub Pages die Seite veröffentlicht.
+
+## Discord-Verifizierung: Was du eintragen musst
+- **Privacy Policy URL**: `https://<username>.github.io/<repo>/privacy.html`
+- **Terms of Service URL**: `https://<username>.github.io/<repo>/terms.html`
+
+Trage diese Links im Discord Developer Portal unter deiner Anwendung beim Abschnitt **Privacy Policy URL** und **Terms of Service URL** ein.
+
+Falls du keine eigene Seite willst, kannst du alternativ einen öffentlichen GitHub Pages Link nutzen, der auf dieselben Dateien zeigt.
 
 8. **Server setup**
    ```

@@ -38,6 +38,17 @@ npm run dashboard
 
 > Hinweis: Der Workflow nutzt den eingebauten GitHub Actions Token `github.token`, daher musst du normalerweise keinen eigenen Secret-Namen anlegen.
 > Falls du einen eigenen Token einträgst, nutze `Settings -> Secrets and variables -> Actions -> New repository secret` mit einem Namen wie `ACTIONS_DEPLOY_TOKEN`.
+>
+> Falls die Seite noch 404 anzeigt:
+> - Prüfe, ob der Workflow erfolgreich gelaufen ist.
+> - Stelle sicher, dass GitHub Pages `gh-pages` als Veröffentlichungszweig nutzt.
+> - Warte nach dem ersten Push ein paar Minuten, bis GitHub die Seite aktiviert hat.
+
+### Was du bei Discord eintragen musst
+- **Privacy Policy URL**: `https://<username>.github.io/<repo>/privacy.html`
+- **Terms of Service URL**: `https://<username>.github.io/<repo>/terms.html`
+
+Diese URLs gibst du im Discord Developer Portal bei deiner App unter **Privacy Policy URL** und **Terms of Service URL** ein.
 
 ---
 
@@ -95,6 +106,16 @@ Wähle dein Theme:
 /invite create <channel> [maxuses] [expire]  # Invite erstellen
 /invite delete <code>                        # Invite löschen
 /invite track                                # Alle Invites anzeigen
+```
+
+### 📣 Community & Tickets
+```
+/community announcement <message> [mention_everyone]  # Ankündigung in #announcements senden
+/community support <issue>                           # Support-Ticket anfordern
+/community ticket create <issue>                     # Ticket-Kanal erstellen
+/community ticket close                              # Ticket-Kanal schließen
+/community poll <question> <options>                 # Poll erstellen
+/community reactionrole <message> <role> <emoji>     # Reaction-Role Nachricht erstellen
 ```
 
 ### ⚙️ Server Settings

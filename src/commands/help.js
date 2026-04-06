@@ -50,6 +50,11 @@ export default {
         name: '🎯 Auto Setup',
         value: '`/setup [theme]` - Choose theme: general, roblox-rp, gta-rp, minecraft-rp, anime-rp',
         inline: false
+      },
+      {
+        name: '📣 Community & Tickets',
+        value: '`/community announcement` `/community support` `/community ticket create` `/community ticket close` `/community poll` `/community reactionrole`',
+        inline: false
       }
     );
 

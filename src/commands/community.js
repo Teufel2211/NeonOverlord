@@ -3,7 +3,7 @@
  * Handles polls, reaction roles, events, etc.
  */
 
-import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { checkBotPermission, checkUserPermission } from '../utils/permissions.js';
 import { createSuccessEmbed, createErrorEmbed } from '../utils/embeds.js';
 import { logInfo } from '../utils/logger.js';
@@ -102,13 +102,69 @@ export default {
             .setDescription('Index of correct answer (1-based)')
             .setRequired(true)
         )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('announcement')
+        .setDescription('Send an announcement to the announcements channel')
+        .addStringOption(option =>
+          option
+            .setName('message')
+            .setDescription('Announcement message')
+            .setRequired(true)
+        )
+        .addBooleanOption(option =>
+          option
+            .setName('mention_everyone')
+            .setDescription('Mention everyone?')
+            .setRequired(false)
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('support')
+        .setDescription('Create a support request ticket')
+        .addStringOption(option =>
+          option
+            .setName('issue')
+            .setDescription('Describe the support issue')
+            .setRequired(true)
+        )
+    )
+    .addSubcommandGroup(group =>
+      group
+        .setName('ticket')
+        .setDescription('Ticket management commands')
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('create')
+            .setDescription('Create a new support ticket channel')
+            .addStringOption(option =>
+              option
+                .setName('issue')
+                .setDescription('Describe your issue')
+                .setRequired(true)
+            )
+        )
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('close')
+            .setDescription('Close the current ticket channel')
+        )
     ),
 
   async execute(interaction) {
+    const commandGroup = interaction.options.getSubcommandGroup(false);
     const subcommand = interaction.options.getSubcommand();
 
-    if (!await checkUserPermission(interaction, PermissionFlagsBits.ManageMessages)) return;
+    const protectedSubcommands = ['poll', 'reactionrole', 'event', 'announcement'];
+    if (protectedSubcommands.includes(subcommand) || (commandGroup === 'ticket' && subcommand === 'close')) {
+      if (!await checkUserPermission(interaction, PermissionFlagsBits.ManageMessages)) return;
+    }
+
     if (!await checkBotPermission(interaction, PermissionFlagsBits.SendMessages)) return;
+
+    if ((subcommand === 'support' || commandGroup === 'ticket') && !await checkBotPermission(interaction, PermissionFlagsBits.ManageChannels)) return;
 
     await interaction.deferReply();
 
@@ -200,6 +256,175 @@ export default {
             title: '😂 Random Meme',
             image: { url: randomMeme }
           }]
+        });
+
+      } else if (subcommand === 'announcement') {
+        const message = interaction.options.getString('message');
+        const mentionEveryone = interaction.options.getBoolean('mention_everyone');
+        const announcementsChannel = interaction.guild.channels.cache.find(ch => ch.name === 'announcements');
+
+        if (!announcementsChannel) {
+          return await interaction.editReply({
+            embeds: [createErrorEmbed('Announcement Failed', 'Bitte erstelle zuerst einen Kanal mit dem Namen #announcements.')]
+          });
+        }
+
+        await announcementsChannel.send({
+          content: mentionEveryone ? '@everyone' : undefined,
+          embeds: [{
+            color: 0xE74C3C,
+            title: '📣 Announcement',
+            description: message,
+            footer: { text: `Announcement by ${interaction.user.tag}` }
+          }]
+        });
+
+        await interaction.editReply({
+          embeds: [createSuccessEmbed('Erfolgreich angekündigt', 'Die Ankündigung wurde im Kanal #announcements veröffentlicht.')]
+        });
+
+      } else if (subcommand === 'support') {
+        const issue = interaction.options.getString('issue');
+        const ticketCategory = interaction.guild.channels.cache.find(ch => ch.name === 'Support Tickets' && ch.type === ChannelType.GuildCategory);
+        const ownerName = interaction.user.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const ticketChannelName = `ticket-${ownerName}`;
+
+        const existingTicket = interaction.guild.channels.cache.find(ch => ch.name === ticketChannelName);
+        if (existingTicket) {
+          return await interaction.editReply({
+            embeds: [createErrorEmbed('Ticket besteht bereits', 'Du hast bereits ein offenes Support-Ticket.')] 
+          });
+        }
+
+        const category = ticketCategory || await interaction.guild.channels.create({
+          name: 'Support Tickets',
+          type: ChannelType.GuildCategory
+        });
+
+        const supportRole = interaction.guild.roles.cache.find(role => role.name === 'Support Team');
+        const ticketChannel = await interaction.guild.channels.create({
+          name: ticketChannelName,
+          type: ChannelType.GuildText,
+          parent: category.id,
+          permissionOverwrites: [
+            {
+              id: interaction.guild.roles.everyone,
+              deny: [PermissionFlagsBits.ViewChannel]
+            },
+            {
+              id: interaction.user.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
+            },
+            {
+              id: interaction.client.user.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.ManageChannels]
+            },
+            ...(supportRole ? [{
+              id: supportRole.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
+            }] : [])
+          ]
+        });
+
+        await ticketChannel.send({
+          content: supportRole ? `<@&${supportRole.id}>` : undefined,
+          embeds: [{
+            color: 0x1ABC9C,
+            title: '🎫 Support Ticket eröffnet',
+            description: `Hallo ${interaction.user}, dein Ticket wurde erstellt. Beschreibe hier dein Problem:
+
+${issue}`,
+            footer: { text: 'Ein Support-Team wird sich schnellstmöglich darum kümmern.' }
+          }]
+        });
+
+        await interaction.editReply({
+          embeds: [createSuccessEmbed('Support Ticket erstellt', `Dein Ticket wurde erstellt: ${ticketChannel}`)]
+        });
+
+      } else if (commandGroup === 'ticket' && subcommand === 'create') {
+        const issue = interaction.options.getString('issue');
+        const ticketCategory = interaction.guild.channels.cache.find(ch => ch.name === 'Support Tickets' && ch.type === ChannelType.GuildCategory);
+        const ownerName = interaction.user.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const ticketChannelName = `ticket-${ownerName}`;
+
+        const existingTicket = interaction.guild.channels.cache.find(ch => ch.name === ticketChannelName);
+        if (existingTicket) {
+          return await interaction.editReply({
+            embeds: [createErrorEmbed('Ticket besteht bereits', 'Du hast bereits ein offenes Ticket.')] 
+          });
+        }
+
+        const category = ticketCategory || await interaction.guild.channels.create({
+          name: 'Support Tickets',
+          type: ChannelType.GuildCategory
+        });
+
+        const supportRole = interaction.guild.roles.cache.find(role => role.name === 'Support Team');
+        const ticketChannel = await interaction.guild.channels.create({
+          name: ticketChannelName,
+          type: ChannelType.GuildText,
+          parent: category.id,
+          permissionOverwrites: [
+            {
+              id: interaction.guild.roles.everyone,
+              deny: [PermissionFlagsBits.ViewChannel]
+            },
+            {
+              id: interaction.user.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
+            },
+            {
+              id: interaction.client.user.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.ManageChannels]
+            },
+            ...(supportRole ? [{
+              id: supportRole.id,
+              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
+            }] : [])
+          ]
+        });
+
+        await ticketChannel.send({
+          content: supportRole ? `<@&${supportRole.id}>` : undefined,
+          embeds: [{
+            color: 0x1ABC9C,
+            title: '🎫 Ticket eröffnet',
+            description: `Ein neues Ticket wurde erstellt von ${interaction.user}.
+
+**Thema:** ${issue}`,
+            footer: { text: 'Schließe dieses Ticket mit /community ticket close.' }
+          }]
+        });
+
+        await interaction.editReply({
+          embeds: [createSuccessEmbed('Ticket erstellt', `Dein Ticket wurde in ${ticketChannel} erstellt.`)]
+        });
+
+      } else if (commandGroup === 'ticket' && subcommand === 'close') {
+        const currentChannel = interaction.channel;
+
+        if (!currentChannel || !currentChannel.name.startsWith('ticket-')) {
+          return await interaction.editReply({
+            embeds: [createErrorEmbed('Schließen fehlgeschlagen', 'Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.')]
+          });
+        }
+
+        await currentChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
+          ViewChannel: false,
+          SendMessages: false
+        });
+
+        await currentChannel.edit({
+          name: `${currentChannel.name}-geschlossen`
+        });
+
+        await currentChannel.send({
+          embeds: [createSuccessEmbed('Ticket geschlossen', 'Dieses Ticket wurde geschlossen.')] 
+        });
+
+        await interaction.editReply({
+          embeds: [createSuccessEmbed('Ticket geschlossen', 'Das Ticket wurde erfolgreich beendet.')] 
         });
 
       } else if (subcommand === 'quiz') {
