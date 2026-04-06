@@ -38,10 +38,21 @@ jobs:
           ls -la docs/
           echo "Contents of docs directory:"
           find docs/ -type f -exec echo "File: {}" \;
+          echo "Checking root HTML files..."
+          ls -la *.html
+
+      - name: Prepare docs for deployment
+        run: |
+          echo "Copying docs to deployment directory..."
+          mkdir -p deploy
+          cp docs/* deploy/ 2>/dev/null || echo "No docs files to copy"
+          cp *.html deploy/ 2>/dev/null || echo "No root HTML files to copy"
+          echo "Deployment directory contents:"
+          ls -la deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ github.token }}
-          publish_dir: ./docs
+          publish_dir: ./deploy
           publish_branch: gh-pages
