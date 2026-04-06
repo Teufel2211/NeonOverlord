@@ -2,11 +2,12 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
+import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
-const port = process.env.DASHBOARD_PORT || 3000;
+let port = parseInt(process.env.DASHBOARD_PORT) || 3000;
 const clientId = process.env.CLIENT_ID || '';
 const appName = process.env.APP_NAME || 'NeonOverlord Bot';
 const inviteUrl = clientId
@@ -19,6 +20,23 @@ const githubRepo = process.env.GITHUB_REPO || 'NeonOverlord';
 const githubPagesBase = `https://${githubUsername}.github.io/${githubRepo}`;
 const termsUrl = `${githubPagesBase}/terms.html`;
 const privacyUrl = `${githubPagesBase}/privacy.html`;
+
+// Globale Variable für den aktuellen Port
+let currentPort = port;
+
+// Funktion um einen freien Port zu finden
+function findAvailablePort(startPort) {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.listen(startPort, () => {
+      server.close(() => resolve(startPort));
+    });
+    server.on('error', () => {
+      // Port ist belegt, versuche nächsten
+      findAvailablePort(startPort + 1).then(resolve).catch(reject);
+    });
+  });
+}
 
 function renderPage(title, body) {
   return `<!DOCTYPE html>
@@ -37,15 +55,17 @@ function renderPage(title, body) {
     h1, h2 { margin: 0 0 16px; }
     pre { background: #010409; color: #c9d1d9; padding: 16px; border-radius: 12px; overflow-x: auto; }
     .footer { margin-top: 40px; color: #8b949e; }
+    .status { background: #238636; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 16px; }
   </style>
 </head>
 <body>
   <header>
     <h1>${appName} Dashboard</h1>
+    <div class="status">🟢 Online auf Port ${currentPort}</div>
   </header>
   <main>
     ${body}
-    <div class="footer">Dashboard läuft auf Port ${port}. Nutze diesen Service zur Dokumentation und Verifikation.</div>
+    <div class="footer">Dashboard läuft auf Port ${currentPort}. Nutze diesen Service zur Dokumentation und Verifikation.</div>
   </main>
 </body>
 </html>`;
@@ -116,5 +136,26 @@ app.get('/features', (req, res) => {
 });
 
 app.listen(port, () => {
+  currentPort = port;
   console.log(`📊 NeonOverlord Dashboard is running on http://localhost:${port}`);
+  console.log(`🌐 Öffne diese URL in deinem Browser: http://localhost:${port}`);
+}).on('error', async (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`⚠️  Port ${port} ist bereits belegt. Suche nach freiem Port...`);
+    try {
+      const availablePort = await findAvailablePort(port + 1);
+      console.log(`✅ Gefunden: Port ${availablePort}`);
+      currentPort = availablePort;
+      app.listen(availablePort, () => {
+        console.log(`📊 NeonOverlord Dashboard is running on http://localhost:${availablePort}`);
+        console.log(`🌐 Öffne diese URL in deinem Browser: http://localhost:${availablePort}`);
+      });
+    } catch (error) {
+      console.error('❌ Konnte keinen freien Port finden:', error);
+      process.exit(1);
+    }
+  } else {
+    console.error('❌ Server Fehler:', err);
+    process.exit(1);
+  }
 });
