@@ -1,0 +1,24 @@
+{
+  "name": "discord-server-management-bot",
+  "version": "1.0.0",
+  "description": "Complete Discord Server Automation & Management Bot with discord.js v14",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "dashboard": "node src/dashboard.js"
+  },
+  "keywords": ["discord", "bot", "discord.js", "management"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
