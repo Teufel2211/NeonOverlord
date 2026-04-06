@@ -86,17 +86,13 @@ Ein vollständiger, automatisierter Discord-Bot für Server-Management und Commu
    npm run deploy
    ```
 
-5. **Bot starten**
-   ```bash
-   npm start
-   ```
+### Schritt 5: Dashboard starten
+```bash
+npm run dashboard
+```
+→ Öffne `http://localhost:3000` im Browser für lokale Dokumentation und Verifikations-URLs.
 
-6. **Dashboard starten**
-   ```bash
-   npm run dashboard
-   ```
-
-7. **GitHub Pages veröffentlichen**
+### Schritt 6: GitHub Pages veröffentlichen
    - Erstelle ein Repository bei GitHub
    - Push dein Projekt
    - GitHub Pages veröffentlicht automatisch den Ordner `docs/`
@@ -118,6 +114,16 @@ Ein vollständiger, automatisierter Discord-Bot für Server-Management und Commu
 Trage diese Links im Discord Developer Portal unter deiner Anwendung beim Abschnitt **Privacy Policy URL** und **Terms of Service URL** ein.
 
 Falls du keine eigene Seite willst, kannst du alternativ einen öffentlichen GitHub Pages Link nutzen, der auf dieselben Dateien zeigt.
+
+### Schritt 7: Repository zu GitHub pushen
+```bash
+git init
+git add .
+git commit -m "Initial commit: NeonOverlord Discord Bot"
+git remote add origin https://github.com/teufel2211/NeonOverlord.git
+git branch -M main
+git push -u origin main
+```
 
 8. **Server setup**
    ```

@@ -44,11 +44,38 @@ npm run dashboard
 > - Stelle sicher, dass GitHub Pages `gh-pages` als Veröffentlichungszweig nutzt.
 > - Warte nach dem ersten Push ein paar Minuten, bis GitHub die Seite aktiviert hat.
 
+### Schritt 7: Repository zu GitHub pushen
+```bash
+# Git Repository initialisieren (falls noch nicht geschehen)
+git init
+git add .
+git commit -m "Initial commit: NeonOverlord Discord Bot"
+
+# Remote Repository hinzufügen (ersetze mit deiner GitHub URL)
+git remote add origin https://github.com/teufel2211/NeonOverlord.git
+
+# Push zum main Branch
+git branch -M main
+git push -u origin main
+```
+
 ### Was du bei Discord eintragen musst
 - **Privacy Policy URL**: `https://<username>.github.io/<repo>/privacy.html`
 - **Terms of Service URL**: `https://<username>.github.io/<repo>/terms.html`
 
 Diese URLs gibst du im Discord Developer Portal bei deiner App unter **Privacy Policy URL** und **Terms of Service URL** ein.
+
+### Schritt 8: GitHub Pages Einstellungen überprüfen
+Nach dem Push zu GitHub:
+1. Gehe zu deinem Repository auf GitHub
+2. Klicke auf "Settings" → "Pages"
+3. Stelle sicher, dass:
+   - **Source**: "GitHub Actions" ausgewählt ist
+   - **Branch**: Sollte automatisch auf "gh-pages" stehen (nach dem ersten Workflow-Run)
+4. Warte, bis der Workflow erfolgreich gelaufen ist
+5. Die URLs sollten dann funktionieren
+
+> **Wichtig**: Wenn du "Static HTML" wählst statt "GitHub Actions", musst du den Branch auf "gh-pages" setzen und die docs/ Dateien manuell dorthin pushen.
 
 ---
 

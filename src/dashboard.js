@@ -13,6 +13,13 @@ const inviteUrl = clientId
   ? `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot%20applications.commands&permissions=8`
   : '#';
 
+// GitHub Pages URLs (wird automatisch aus Repository-Info generiert)
+const githubUsername = process.env.GITHUB_USERNAME || 'teufel2211'; // Aus den GitHub Pages Einstellungen
+const githubRepo = process.env.GITHUB_REPO || 'NeonOverlord';
+const githubPagesBase = `https://${githubUsername}.github.io/${githubRepo}`;
+const termsUrl = `${githubPagesBase}/terms.html`;
+const privacyUrl = `${githubPagesBase}/privacy.html`;
+
 function renderPage(title, body) {
   return `<!DOCTYPE html>
 <html lang="de">
@@ -59,17 +66,35 @@ app.get('/', (req, res) => {
       <h2>Willkommen im NeonOverlord Dashboard</h2>
       <p>Dieses Dashboard bietet schnelle Informationen, Verifikationslinks und die Rechtsdokumente für deinen Bot.</p>
       <ul>
-        <li><a href="/terms">Nutzungsbedingungen</a></li>
-        <li><a href="/privacy">Datenschutzerklärung</a></li>
+        <li><a href="/terms">Nutzungsbedingungen (lokal)</a></li>
+        <li><a href="/privacy">Datenschutzerklärung (lokal)</a></li>
         <li><a href="/features">Feature Ideen</a></li>
         <li><a href="${inviteUrl}">Bot einladen</a></li>
       </ul>
     </div>
     <div class="card">
+      <h2>🔗 GitHub Pages Verifikations-URLs</h2>
+      <p>Diese öffentlichen URLs kannst du für die Discord-Bot-Verifikation nutzen:</p>
+      <ul>
+        <li><strong>Privacy Policy URL:</strong> <a href="${privacyUrl}" target="_blank">${privacyUrl}</a></li>
+        <li><strong>Terms of Service URL:</strong> <a href="${termsUrl}" target="_blank">${termsUrl}</a></li>
+      </ul>
+      <p><em>💡 Diese Links funktionieren erst, nachdem du das Repository zu GitHub gepusht hast und der GitHub Pages Workflow erfolgreich gelaufen ist.</em></p>
+      <h3>Discord Developer Portal Eintragung:</h3>
+      <ol>
+        <li>Gehe zu <a href="https://discord.com/developers/applications" target="_blank">discord.com/developers/applications</a></li>
+        <li>Wähle deine Bot-Application aus</li>
+        <li>Gehe zum Tab "General Information"</li>
+        <li>Trage die oben genannten URLs in die Felder "Privacy Policy URL" und "Terms of Service URL" ein</li>
+        <li>Klicke auf "Save Changes"</li>
+      </ol>
+    </div>
+    <div class="card">
       <h2>Bot-Informationen</h2>
       <p><strong>Name:</strong> ${appName}</p>
       <p><strong>Client ID:</strong> ${clientId || 'Nicht gesetzt'}</p>
-      <p><strong>Verifikationsdokumente:</strong> Nutzungsbedingungen und Datenschutzerklärung</p>
+      <p><strong>GitHub Pages:</strong> ${githubPagesBase}</p>
+      <p><strong>Verifikationsstatus:</strong> Nutzungsbedingungen und Datenschutzerklärung verfügbar</p>
     </div>
   `;
   res.send(renderPage('NeonOverlord Dashboard', body));
