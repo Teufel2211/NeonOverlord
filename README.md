@@ -98,6 +98,9 @@ Ein vollständiger, automatisierter Discord-Bot für Server-Management und Commu
    - GitHub Pages veröffentlicht automatisch den Ordner `docs/`
    - Die öffentlichen URLs sind dann z. B. `https://<username>.github.io/<repo>/terms.html` und `https://<username>.github.io/<repo>/privacy.html`
 
+> Hinweis: Der Workflow nutzt den eingebauten GitHub Actions Token `github.token`, daher musst du normalerweise keinen eigenen Secret-Namen anlegen.
+> Falls du einen eigenen Token einträgst, nutze `Settings -> Secrets and variables -> Actions -> New repository secret` mit einem Namen wie `ACTIONS_DEPLOY_TOKEN`.
+
 8. **Server setup**
    ```
    /setup general    # oder roblox-rp, gta-rp, minecraft-rp, anime-rp

@@ -36,6 +36,9 @@ npm run dashboard
    - `https://<username>.github.io/<repo>/terms.html`
    - `https://<username>.github.io/<repo>/privacy.html`
 
+> Hinweis: Der Workflow nutzt den eingebauten GitHub Actions Token `github.token`, daher musst du normalerweise keinen eigenen Secret-Namen anlegen.
+> Falls du einen eigenen Token einträgst, nutze `Settings -> Secrets and variables -> Actions -> New repository secret` mit einem Namen wie `ACTIONS_DEPLOY_TOKEN`.
+
 ---
 
 ## 📊 Bot-Commands Übersicht
