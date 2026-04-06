@@ -32,6 +32,13 @@ jobs:
       - name: Build docs
         run: echo "Docs are ready"
 
+      - name: Verify docs exist
+        run: |
+          echo "Checking docs directory..."
+          ls -la docs/
+          echo "Contents of docs directory:"
+          find docs/ -type f -exec echo "File: {}" \;
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
